@@ -40,6 +40,56 @@ export async function fetchSnapshot(ctx: Ctx): Promise<AlistiaSnapshot> {
 	return snapshot;
 }
 
+async function writeRequest(
+	ctx: IExecuteFunctions,
+	method: 'POST' | 'PATCH' | 'DELETE',
+	path: string,
+	body?: IDataObject,
+): Promise<IDataObject> {
+	const credentials = await ctx.getCredentials('alistiaWriteApi');
+	const baseUrl = String(credentials.baseUrl || 'https://write.alistia.app').replace(/\/+$/, '');
+	const token = String(credentials.token || '').trim();
+
+	return (await ctx.helpers.httpRequest({
+		method,
+		url: `${baseUrl}${path}`,
+		headers: {
+			authorization: `Bearer ${token}`,
+			'content-type': 'application/json',
+			accept: 'application/json',
+		},
+		body,
+		json: true,
+	})) as IDataObject;
+}
+
+/** Create one entry from a `{ fieldId: value }` map. */
+export function createEntry(ctx: IExecuteFunctions, values: IDataObject): Promise<IDataObject> {
+	return writeRequest(ctx, 'POST', '/v1/entries', { values });
+}
+
+/** Update the given fields of an entry (optional revision for concurrency). */
+export function updateEntry(
+	ctx: IExecuteFunctions,
+	entryId: string,
+	values: IDataObject,
+	revision?: number,
+): Promise<IDataObject> {
+	const body: IDataObject = { values };
+	if (revision !== undefined && revision !== null) body.revision = revision;
+	return writeRequest(ctx, 'PATCH', `/v1/entries/${encodeURIComponent(entryId)}`, body);
+}
+
+/** Soft-delete an entry (optional revision for concurrency). */
+export function deleteEntry(
+	ctx: IExecuteFunctions,
+	entryId: string,
+	revision?: number,
+): Promise<IDataObject> {
+	const q = revision !== undefined && revision !== null ? `?revision=${revision}` : '';
+	return writeRequest(ctx, 'DELETE', `/v1/entries/${encodeURIComponent(entryId)}${q}`);
+}
+
 /**
  * Turns snapshot entries into n8n items. With `labelsAsKeys` the field labels
  * become the item keys (nice for mapping); otherwise the raw `{ id, values }`

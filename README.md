@@ -4,11 +4,9 @@ n8n community node for [Alistia](https://alistia.app) — read shared lists and
 views (public share **Data Links**) as clean JSON.
 
 Alistia users can publish a list as a public share and enable a JSON data link.
-This package lets an n8n workflow read that data and react to changes — for
-dashboards, Home Assistant, notifications or any automation.
-
-> **Read-only.** This MVP reads shared data. Writing entries back (create /
-> update) is planned for a later release, once the Alistia write API ships.
+This package lets an n8n workflow **read** that data, **write** entries back, and
+react to changes in **real time** — for dashboards, Home Assistant,
+notifications or any automation.
 
 ## Installation
 
@@ -41,33 +39,57 @@ to one shared list or view.
 The credential test fetches `/v1/views/{token}.json`. A `403 json_disabled`
 means the JSON data link still has to be enabled in the app.
 
+## Credential — Alistia Write API
+
+For **writing** entries, create an **Alistia Write API** credential:
+
+| Field | Description |
+| --- | --- |
+| **Base URL** | `https://write.alistia.app` (change only for self-hosting). |
+| **Write Token** | A write token from the Alistia app (list → **Write-API**). |
+
+A write token is scoped to one list and to the operations you allow (create /
+update / delete). It is sent as `Authorization: Bearer …`.
+
 ## Nodes
 
 ### Alistia
 
-Read a shared list on demand.
+Read and write a list.
 
-- **Entry → Get Many** — returns every entry of the shared list as items. With
-  *Field Labels as Keys* (default), item keys are the human field labels; turn
-  it off for the raw `{ id, values }` shape keyed by field id.
-- **Shared View → Get** — returns the full snapshot (list, fields, entries) as a
-  single item.
+- **Entry → Get Many** (read) — every entry as items. With *Field Labels as
+  Keys* (default), keys are the field labels; off gives the raw
+  `{ id, values }` shape keyed by field id.
+- **Shared View → Get** (read) — the full snapshot (list, fields, entries).
+- **Entry → Create** (write) — create an entry from a `{ fieldId: value }` JSON
+  map. Runs per input item.
+- **Entry → Update** (write) — update fields of an entry by id; optional
+  *Revision* for optimistic concurrency (a mismatch returns `409`).
+- **Entry → Delete** (write) — soft-delete an entry by id.
 
-### Alistia Trigger
+Read operations use the *Data Link API* credential; write operations use the
+*Write API* credential — the node asks for the right one per operation.
+
+### Alistia Trigger (polling)
 
 Polls the shared list on a schedule.
 
 - **New Entry** — emits each entry that newly appears (deduplicated by id).
 - **Any Change** — emits all entries whenever the snapshot changes.
 
-On the first scheduled poll the trigger seeds its state and emits nothing;
-subsequent polls emit only what changed. A manual test execution returns the
-current entries so you can see the shape.
+### Alistia Webhook Trigger (real-time)
+
+A webhook receiver. Copy its **Production URL** into an Alistia webhook target
+(list → **Webhooks**). Alistia then pushes `entry.created` / `entry.updated` /
+`entry.deleted` (and form submissions) as they happen. Set the optional
+**Signing Secret** to verify the `x-alistia-signature` HMAC and reject forged
+requests. The event name is available on the output as `_event`.
 
 ## Example
 
-`Alistia Trigger (New Entry)` → `IF` → `Slack`: post a message whenever a new
-item appears in a shared shopping or task list.
+`Alistia Webhook Trigger` → `IF` → `Slack`: post a message the moment a new
+item appears in a shared list. Or `Schedule` → `Alistia (Entry → Create)` to
+push rows from a spreadsheet into a list.
 
 ## Data shape
 

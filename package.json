@@ -1,6 +1,6 @@
 {
-  "name": "n8n-nodes-alistia",
-  "version": "0.1.0",
+  "name": "@pandee-de/n8n-nodes-alistia",
+  "version": "0.1.1",
   "description": "n8n community node for Alistia — read shared lists and views (public share Data Links) as clean JSON.",
   "keywords": [
     "n8n-community-node-package",
@@ -34,17 +34,20 @@
   "n8n": {
     "n8nNodesApiVersion": 1,
     "credentials": [
-      "dist/credentials/AlistiaDataLinkApi.credentials.js"
+      "dist/credentials/AlistiaDataLinkApi.credentials.js",
+      "dist/credentials/AlistiaWriteApi.credentials.js"
     ],
     "nodes": [
       "dist/nodes/Alistia/Alistia.node.js",
-      "dist/nodes/AlistiaTrigger/AlistiaTrigger.node.js"
+      "dist/nodes/AlistiaTrigger/AlistiaTrigger.node.js",
+      "dist/nodes/AlistiaWebhookTrigger/AlistiaWebhookTrigger.node.js"
     ]
   },
   "peerDependencies": {
     "n8n-workflow": "*"
   },
   "devDependencies": {
+    "@types/node": "^18.19.130",
     "n8n-workflow": "^1.60.0",
     "typescript": "^5.5.0"
   }
