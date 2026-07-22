@@ -1,0 +1,14 @@
+{
+	"node": "n8n-nodes-alistia.alistia",
+	"nodeVersion": "1.0",
+	"codexVersion": "1.0",
+	"categories": ["Data & Storage", "Productivity"],
+	"resources": {
+		"credentialDocumentation": [
+			{ "url": "https://alistia.app/api/" }
+		],
+		"primaryDocumentation": [
+			{ "url": "https://alistia.app/api/" }
+		]
+	}
+}

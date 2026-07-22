@@ -1,0 +1,51 @@
+{
+  "name": "n8n-nodes-alistia",
+  "version": "0.1.0",
+  "description": "n8n community node for Alistia — read shared lists and views (public share Data Links) as clean JSON.",
+  "keywords": [
+    "n8n-community-node-package",
+    "n8n",
+    "alistia",
+    "lists",
+    "data-link"
+  ],
+  "license": "MIT",
+  "homepage": "https://alistia.app/api/",
+  "author": {
+    "name": "pandee-de",
+    "url": "https://alistia.app"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/pandee-de/n8n-nodes-alistia.git"
+  },
+  "engines": {
+    "node": ">=18.10"
+  },
+  "main": "index.js",
+  "scripts": {
+    "build": "tsc && node scripts/copy-assets.mjs",
+    "dev": "tsc --watch",
+    "prepublishOnly": "npm run build"
+  },
+  "files": [
+    "dist"
+  ],
+  "n8n": {
+    "n8nNodesApiVersion": 1,
+    "credentials": [
+      "dist/credentials/AlistiaDataLinkApi.credentials.js"
+    ],
+    "nodes": [
+      "dist/nodes/Alistia/Alistia.node.js",
+      "dist/nodes/AlistiaTrigger/AlistiaTrigger.node.js"
+    ]
+  },
+  "peerDependencies": {
+    "n8n-workflow": "*"
+  },
+  "devDependencies": {
+    "n8n-workflow": "^1.60.0",
+    "typescript": "^5.5.0"
+  }
+}
