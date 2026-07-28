@@ -48,7 +48,7 @@ export class AlistiaTrigger implements INodeType {
 				type: 'boolean',
 				default: true,
 				description:
-					'Whether to use human field labels as item keys. When off, items are the raw { id, values } shape keyed by field id.',
+					'Whether to use human field labels as item keys. When off, items are the { id, values } shape keyed by field key.',
 			},
 		],
 	};
@@ -79,8 +79,7 @@ export class AlistiaTrigger implements INodeType {
 		}
 
 		// anyChange
-		const share = (snapshot.share ?? {}) as IDataObject;
-		const stamp = String(share.sourceUpdatedAt ?? share.generatedAt ?? '');
+		const stamp = String(snapshot.generatedAt ?? '');
 
 		if (manualMode) {
 			return rows.length ? [this.helpers.returnJsonArray(rows)] : null;

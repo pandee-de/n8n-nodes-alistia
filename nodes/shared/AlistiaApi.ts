@@ -1,7 +1,7 @@
 import type { IExecuteFunctions, IPollFunctions, IDataObject } from 'n8n-workflow';
 
 export interface AlistiaField {
-	id: string;
+	key: string;
 	name: string;
 	type: string;
 }
@@ -9,17 +9,14 @@ export interface AlistiaField {
 export interface AlistiaEntry {
 	id: string;
 	values: IDataObject;
+	group?: string;
 }
 
 export interface AlistiaSnapshot {
-	schemaVersion: number;
-	source: string;
-	share: IDataObject;
 	list: IDataObject;
-	view: IDataObject | null;
+	generatedAt?: string;
 	fields: AlistiaField[];
 	entries: AlistiaEntry[];
-	pagination: IDataObject | null;
 }
 
 type Ctx = IExecuteFunctions | IPollFunctions;
@@ -63,7 +60,7 @@ async function writeRequest(
 	})) as IDataObject;
 }
 
-/** Create one entry from a `{ fieldId: value }` map. */
+/** Create one entry from a `{ fieldKey: value }` map (natural values; the API coerces). */
 export function createEntry(ctx: IExecuteFunctions, values: IDataObject): Promise<IDataObject> {
 	return writeRequest(ctx, 'POST', '/v1/entries', { values });
 }
@@ -92,17 +89,17 @@ export function deleteEntry(
 
 /**
  * Turns snapshot entries into n8n items. With `labelsAsKeys` the field labels
- * become the item keys (nice for mapping); otherwise the raw `{ id, values }`
- * shape (field-id keyed) is returned.
+ * become the item keys (nice for mapping); otherwise the `{ id, values }`
+ * shape (field-key keyed) is returned.
  */
 export function entriesToItems(
 	snapshot: AlistiaSnapshot,
 	labelsAsKeys: boolean,
 ): IDataObject[] {
 	const fields = Array.isArray(snapshot.fields) ? snapshot.fields : [];
-	const idToName = new Map<string, string>();
+	const keyToName = new Map<string, string>();
 	for (const field of fields) {
-		idToName.set(field.id, field.name || field.id);
+		keyToName.set(field.key, field.name || field.key);
 	}
 
 	const entries = Array.isArray(snapshot.entries) ? snapshot.entries : [];
@@ -112,8 +109,8 @@ export function entriesToItems(
 		}
 		const mapped: IDataObject = { id: entry.id };
 		const values = entry.values ?? {};
-		for (const [fieldId, value] of Object.entries(values)) {
-			mapped[idToName.get(fieldId) ?? fieldId] = value as IDataObject[string];
+		for (const [fieldKey, value] of Object.entries(values)) {
+			mapped[keyToName.get(fieldKey) ?? fieldKey] = value as IDataObject[string];
 		}
 		return mapped;
 	});

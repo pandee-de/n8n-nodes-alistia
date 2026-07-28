@@ -1,6 +1,6 @@
 {
   "name": "@pandee-de/n8n-nodes-alistia",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "description": "n8n community node for Alistia — read shared lists and views (public share Data Links) as clean JSON.",
   "keywords": [
     "n8n-community-node-package",

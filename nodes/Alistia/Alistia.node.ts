@@ -101,7 +101,7 @@ export class Alistia implements INodeType {
 				default: true,
 				displayOptions: { show: { resource: ['entry'], operation: ['getMany'] } },
 				description:
-					'Whether to use human field labels as item keys. When off, items are the raw { id, values } shape keyed by field id.',
+					'Whether to use human field labels as item keys. When off, items are the { id, values } shape keyed by field key.',
 			},
 			{
 				displayName: 'Entry ID',
@@ -119,7 +119,7 @@ export class Alistia implements INodeType {
 				default: '{}',
 				displayOptions: { show: { resource: ['entry'], operation: ['create', 'update'] } },
 				description:
-					'Field values keyed by field id, e.g. { "field_title": "Book car" }. Field ids come from the read node (Get Many with labels off, or Shared View → Get).',
+					'Field values keyed by field key, e.g. { "titel": "Neuer Film" }. Send natural values (dates as "2026-08-01", numbers as 4) — the API coerces them. Field keys come from the read node (Get Many with labels off, or Shared View → Get).',
 			},
 			{
 				displayName: 'Revision',
