@@ -58,11 +58,12 @@ update / delete). It is sent as `Authorization: Bearer …`.
 Read and write a list.
 
 - **Entry → Get Many** (read) — every entry as items. With *Field Labels as
-  Keys* (default), keys are the field labels; off gives the raw
-  `{ id, values }` shape keyed by field id.
-- **Shared View → Get** (read) — the full snapshot (list, fields, entries).
-- **Entry → Create** (write) — create an entry from a `{ fieldId: value }` JSON
-  map. Runs per input item.
+  Keys* (default), keys are the field labels; off gives the `{ id, values }`
+  shape keyed by field key.
+- **Shared View → Get** (read) — the lean snapshot (list, fields, entries).
+- **Entry → Create** (write) — create an entry from a `{ fieldKey: value }` JSON
+  map. Send natural values (dates as `2026-08-01`, numbers as `4`) — the API
+  coerces them. Runs per input item.
 - **Entry → Update** (write) — update fields of an entry by id; optional
   *Revision* for optimistic concurrency (a mismatch returns `409`).
 - **Entry → Delete** (write) — soft-delete an entry by id.
@@ -93,8 +94,11 @@ push rows from a spreadsheet into a list.
 
 ## Data shape
 
-Responses follow the Alistia Public Share API. Field ids are stable; labels are
-localized. See the full reference and OpenAPI spec at
+Responses follow the Alistia Public Share API. Fields are addressed by their
+stable **key** (a slug of the field name, e.g. `"Länge (Min)"` → `laenge_min`) —
+never internal ids — and each field carries one canonical, typed value (dates
+`YYYY-MM-DD`, numbers as numbers). The same key is used for reading and writing.
+See the full reference and OpenAPI spec at
 **[alistia.app/api](https://alistia.app/api/)**.
 
 ## Development
